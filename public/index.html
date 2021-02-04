@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="https://cdn.socket.io/3.1.1/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+
+<body>
+    <form id="chat">
+        <input type="text" name="username" placeholder="Digite seu usuário">
+        <div class="messages"></div>
+        <input type="text" name="message" placeholder="Digite sua mensagem">
+        <button type="submit">Enviar</button>
+    </form>
+    <script type="text/javascript">
+        const socket = io('http://localhost:3000');
+
+        function renderMessage(message) {
+            document.querySelector('input[name=message]').value = '';
+            $('div.messages').append(`<div class="message"><strong>${message.author}</strong>: ${message.content}</div>`);
+        }
+
+        function sendMessage() {
+
+            event.preventDefault();
+
+            const author = document.querySelector('input[name=username]').value;
+            const contentMessage = document.querySelector('input[name=message]').value;
+
+            if (author.length && contentMessage.length) {
+                const message = {
+                    author: author,
+                    content: contentMessage
+                }
+                renderMessage(message);
+                socket.emit('sendMessage', message);
+            }
+        }
+
+        socket.on('receivedMessage', function (message) {
+            renderMessage(message);
+        })
+
+        document.querySelector('form#chat').addEventListener('submit', sendMessage);
+    </script>
+</body>
+
+</html>
